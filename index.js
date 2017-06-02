@@ -1,7 +1,7 @@
 let koa = require('koa');
 let fs = require('fs');
 
-let app = koa() ;
+let app = new koa() ;
 
 app.use(function* () {
     this.body = 'Hello world!';
