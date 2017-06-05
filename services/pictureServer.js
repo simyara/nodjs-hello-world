@@ -84,10 +84,7 @@ const picItems = [
 
 module.exports = {
     getItemsList() {
-        return {
-            status: 'success',
-            data: picItems
-        };
+        return picItems;
     }
 };
 
