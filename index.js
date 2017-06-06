@@ -1,6 +1,6 @@
 "use strict";
+
 let Koa = require('koa');
-let fs = require('fs');
 
 let router = require('./api');
 

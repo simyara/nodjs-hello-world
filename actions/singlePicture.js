@@ -3,10 +3,10 @@
 let pictureServer = require('../services/pictureServer');
 
 module.exports = {
-    getAllPictures:  function* () {
+    getOnePicture:  function* () {
         this.body = {
             status:'success',
-            data: pictureServer.getItemsList()
+            data: pictureServer.findOne(this.params.id)
         };
     }
 };
