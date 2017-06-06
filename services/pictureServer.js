@@ -86,7 +86,7 @@ module.exports = {
     getItemsList() {
         return picItems;
     },
-    findOne(id) {
+    *findOne(id) {
         return picItems.find((x) => x.id === id);
     }
 };
