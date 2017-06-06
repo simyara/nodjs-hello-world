@@ -85,6 +85,9 @@ const picItems = [
 module.exports = {
     getItemsList() {
         return picItems;
+    },
+    *findOne(id) {
+        return picItems.find((x) => x.id === id);
     }
 };
 

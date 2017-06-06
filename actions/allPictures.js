@@ -1,4 +1,5 @@
 "use strict";
+
 let pictureServer = require('../services/pictureServer');
 
 module.exports = {
