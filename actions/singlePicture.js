@@ -1,18 +1,8 @@
 "use strict";
 
 let pictureServer = require('../services/pictureServer');
-let pictureValidator = require('../middleware/validator');
-
-function updateItem(origObj, dataToUpdate){
-    Object.keys(dataToUpdate).forEach(function(key){
-        if ((typeof dataToUpdate[key]) === 'object'){
-            updateItem(origObj[key], dataToUpdate[key]);
-        }
-        else {
-            origObj[key]=dataToUpdate[key];
-        }
-    });
-}
+let lodash = require('lodash');
+let validator = require('../services/validator');
 
 module.exports = {
     getOnePicture: function*() {
@@ -35,6 +25,15 @@ module.exports = {
         };
     },
     updateOnePicture: function*(next) {
+
+        let validationResult = yield validator.validateObject(this.request.body);
+
+        if (!validationResult.isValid){
+                this.status = validationResult.status;
+                this.body = validationResult.body;
+                return;
+        }
+
         let pictureData = yield pictureServer.findOne(this.params.id);
 
         if (!pictureData) {
@@ -48,7 +47,7 @@ module.exports = {
             return;
         }
 
-        updateItem(pictureData, this.request.body);
+        lodash.merge(pictureData, this.request.body);
 
         this.body = {
             status:'success',
