@@ -3,8 +3,10 @@
 let Koa = require('koa');
 
 let router = require('./api');
+let errorHandler = require('./middleware/errorHandler');
 
 let app = new Koa();
+app.use(errorHandler.createError);
 
 app.use(router.routes());
 
