@@ -26,14 +26,10 @@ function validate(obj, schema) {
         return x;
     });
 
-    console.log(errorString);
-
     let resObj = {
         isValid: errorString.length <= 0,
         errorMessage: errorString.join()
     };
-
-    console.log(resObj);
 
     return resObj;
 }
