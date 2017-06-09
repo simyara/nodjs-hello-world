@@ -1,57 +1,43 @@
 "use strict";
 
-const schema = {
-    name: 'string',
-    details: {
-        url: 'string',
-        description: 'string'
-    }
-};
 
-function validate(obj, schema){
 
-    let resultObj = {
-        isValid: true
-    };
+function validate(obj, schema) {
+    let errorMessage;
 
-    Object.keys(obj).every(function(element) {
-
+    let errorString = Object.keys(obj).map(function (element) {
         if (!schema[element]) {
-            resultObj.isValid = false;
-            resultObj.status = 400;
-            resultObj.body = {
-                status: 'fail',
-                data: {
-                    error: 'One or more property is not defined for the object'
-                }
-            };
-            return false;
+            errorMessage = element + ' is not defined for the object';
+            return errorMessage;
         }
 
         if ((typeof schema[element]) === 'object') {
-            return validate(obj[element], schema[element]);  //(*) recursion
+            let res = validate(obj[element], schema[element]);
+            return res.errorMessage;  //(*) recursion
         }
 
         if ((typeof obj[element]) !== schema[element]) {
-            resultObj.isValid = false;
-            resultObj.status = 400;
-            resultObj.body = {
-                status: 'fail',
-                data: {
-                    error: 'Type mismatch'
-                }
-            };
-
+            errorMessage = element + ' type mismatch';
+            return errorMessage;
         }
-        return true;
+
+        return;
+    }).filter(function (x) {
+        return x;
     });
-    return resultObj;
+
+    console.log(errorString);
+
+    let resObj = {
+        isValid: errorString.length <= 0,
+        errorMessage: errorString.join()
+    };
+
+    console.log(resObj);
+
+    return resObj;
 }
 
 module.exports = {
-    validateObject:  function* (obj){
-        //let obj = this.request.body;
-       return validate(obj,schema);
-
-    }
+    validateObject: validate
 };

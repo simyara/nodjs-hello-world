@@ -4,6 +4,15 @@ let pictureServer = require('../services/pictureServer');
 let lodash = require('lodash');
 let validator = require('../services/validator');
 
+const schema = {
+    name: 'string',
+    details: {
+        url: 'string',
+        description: 'string'
+    }
+};
+
+
 module.exports = {
     getOnePicture: function*() {
         let pictureData = yield pictureServer.findOne(this.params.id);
@@ -26,11 +35,16 @@ module.exports = {
     },
     updateOnePicture: function*(next) {
 
-        let validationResult = yield validator.validateObject(this.request.body);
+        let validationResult = yield validator.validateObject(this.request.body, schema);
 
         if (!validationResult.isValid){
-                this.status = validationResult.status;
-                this.body = validationResult.body;
+                this.status = 400;
+                this.body = {
+                    status: 'fail',
+                    data: {
+                        error: validationResult.errorMessage
+                    }
+                };
                 return;
         }
 
