@@ -22,18 +22,14 @@ function validateObject(obj, schema) {
             }
         }
 
-        if (schema[key].type === 'object') {
-            if ((typeof obj[key]) === 'object') {
-                let res = validateObject(obj[key], schema[key].properties);
-                return res.errorMessage;  //(*) recursion
-            }
+        if ((typeof obj[key]) !== schema[key].type) {
             errorMessage = key + ' type mismatch';
             return errorMessage;
         }
 
-        if ((typeof obj[key]) !== schema[key].type) {
-            errorMessage = key + ' type mismatch';
-            return errorMessage;
+        if (schema[key].type === 'object') {
+            let res = validateObject(obj[key], schema[key].properties);
+            return res.errorMessage;  //(*) recursion
         }
 
         return;
