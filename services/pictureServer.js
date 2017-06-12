@@ -1,5 +1,8 @@
 "use strict";
-const picItems = [
+
+let lodash = require('lodash');
+
+let picItems = [
     {
         name: 'IMG_1',
         id: 'xbscw0g7e',
@@ -88,7 +91,15 @@ module.exports = {
     },
     *findOne(id) {
         return picItems.find((x) => x.id === id);
-    }
-
+    },
+    *putOne(id, item) {
+        let newItem = lodash.merge({id: id}, item);
+        picItems.push(newItem);
+        return newItem;
+    },
+    *deleteOne(id){
+        picItems = picItems.filter((item) => item.id !== id);
+        return id;
+        }
 };
 

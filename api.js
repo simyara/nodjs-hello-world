@@ -11,5 +11,9 @@ router.get('/pictures/:id', sPicture.getOnePicture);
 
 router.post('/pictures/:id', bodyParser.parseBody, sPicture.updateOnePicture);
 
+router.put('/pictures/:id', bodyParser.parseBody, sPicture.addOnePicture);
+
+router.delete('/pictures/:id', sPicture.deleteOnePicture);
+
 
 module.exports = router;
