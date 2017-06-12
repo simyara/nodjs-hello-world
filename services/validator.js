@@ -1,23 +1,38 @@
 "use strict";
 
+let _ = require('lodash');
 
-//all fields in obj need to be presented in schema and need type like as in schema
-function validate(obj, schema) {
+function validateObject(obj, schema) {
+
+    let errorUnexpectedMessage;
     let errorMessage;
 
-    let errorString = Object.keys(obj).map(function (element) {
-        if (!schema[element]) {
-            errorMessage = element + ' is not defined for the object';
+    let unexpected = _.difference(Object.keys(obj), Object.keys(schema));
+
+    if (unexpected.length > 0) {
+        errorUnexpectedMessage = unexpected.join(', ') + ' is not defined for the object';
+    }
+
+    let errorString = Object.keys(schema).map(function (key) {
+
+        if (schema[key].required) {
+            if (obj[key] === 'undefined') {
+                errorMessage = key + ' value is required';
+                return errorMessage;
+            }
+        }
+
+        if (schema[key].type === 'object') {
+            if ((typeof obj[key]) === 'object') {
+                let res = validateObject(obj[key], schema[key].properties);
+                return res.errorMessage;  //(*) recursion
+            }
+            errorMessage = key + ' type mismatch';
             return errorMessage;
         }
 
-        if ((typeof schema[element].type) === 'object') {
-            let res = validate(obj[element], schema[element].type);
-            return res.errorMessage;  //(*) recursion
-        }
-
-        if ((typeof obj[element]) !== schema[element].type) {
-            errorMessage = element + ' type mismatch';
+        if ((typeof obj[key]) !== schema[key].type) {
+            errorMessage = key + ' type mismatch';
             return errorMessage;
         }
 
@@ -26,44 +41,19 @@ function validate(obj, schema) {
         return x;
     });
 
-    let resObj = {
-        isValid: errorString.length <= 0,
-        errorMessage: errorString.join()
-    };
-
-    return resObj;
-}
-
-//all fields in schema marked as required must be presented in object
-function validateRequired(obj, schema) {
-    let errorMessage;
-
-    let errorString = Object.keys(schema).filter(function (key) {
-        return (((typeof schema[key].type) === 'object') || schema[key].required);
-    }).map(function (element) {
-        if ((typeof schema[element].type) === 'object') {
-            let res = validateRequired(obj[element], schema[element].type);
-            return res.errorMessage;  //(*) recursion
-        }
-        if (!obj[element]) {
-            errorMessage = element + ' is required';
-            return errorMessage;
-        }
-
-        return;
-    }).filter(function (x) {
-        return x;
-    });
+    if (errorUnexpectedMessage) {
+        errorString.unshift(errorUnexpectedMessage);
+    }
 
     let resObj = {
         isValid: errorString.length <= 0,
-        errorMessage: errorString.join()
+        errorMessage: errorString.join('; ')
     };
 
     return resObj;
+
 }
 
 module.exports = {
-    validateObject: validate,
-    validateRequiredFields: validateRequired
+    validate: validateObject
 };

@@ -1,12 +1,8 @@
 "use strict";
 
 let pictureServer = require('../services/pictureServer');
-let lodash = require('lodash');
+let _ = require('lodash');
 let validator = require('../services/validator');
-
-
-
-
 
 module.exports = {
     getOnePicture: function*() {
@@ -33,14 +29,15 @@ module.exports = {
         const schema = {
             name: {type: 'string'},
             details: {
-                type :{
+                type :'object',
+                properties: {
                     url: {type: 'string'},
                     description: {type: 'string'}
                 }
             }
         };
 
-        let validationResult = yield validator.validateObject(this.request.body, schema);
+        let validationResult = yield validator.validate(this.request.body, schema);
 
         if (!validationResult.isValid){
                 this.status = 400;
@@ -69,7 +66,7 @@ module.exports = {
             return;
         }
 
-        lodash.merge(pictureData, this.request.body);
+        _.merge(pictureData, this.request.body);
 
         this.body = {
             status:'success',
@@ -80,17 +77,18 @@ module.exports = {
     },
     addOnePicture: function*(next) {
 
-        const schema = {
-            name: {type: 'string'},
+        const schemaToPut = {
+            name: {type: 'string', required: true},
             details: {
-                type :{
-                    url: {type: 'string'},
-                    description: {type: 'string'}
+                type :'object',
+                properties: {
+                    url: {type: 'string', required: true},
+                    description: {type: 'string', required: false}
                 }
             }
         };
 
-        let validationResult = yield validator.validateObject(this.request.body, schema);
+        let validationResult = yield validator.validate(this.request.body, schemaToPut);
 
         if (!validationResult.isValid){
             this.status = 400;
@@ -101,35 +99,12 @@ module.exports = {
                 }
             };
             return;
-        };
-
-        const schemaToPut = {
-            name: {type: 'string', required: true},
-            details: {
-                type :{
-                    url: {type: 'string', required: true},
-                    description: {type: 'string', required: false}
-                }
-            }
-        };
-
-        let validationReqResult = yield validator.validateRequiredFields(this.request.body, schemaToPut);
-
-        if (!validationReqResult.isValid){
-            this.status = 400;
-            this.body = {
-                status: 'fail',
-                data: {
-                    error: validationReqResult.errorMessage
-                }
-            };
-            return;
         }
 
         let pictureData = yield pictureServer.findOne(this.params.id, this.request.body);
 
         if (pictureData) {
-            this.status = 404;
+            this.status = 400;
             this.body = {
                 status: 'fail',
                 data: {
@@ -156,7 +131,7 @@ module.exports = {
             this.body = {
                 status: 'fail',
                 data: {
-                    error: 'Picture ot found'
+                    error: 'Picture not found'
                 }
             };
             return;

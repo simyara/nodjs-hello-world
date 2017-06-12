@@ -1,6 +1,6 @@
 "use strict";
 
-let lodash = require('lodash');
+let _ = require('lodash');
 
 let picItems = [
     {
@@ -93,7 +93,7 @@ module.exports = {
         return picItems.find((x) => x.id === id);
     },
     *putOne(id, item) {
-        let newItem = lodash.merge({id: id}, item);
+        let newItem = _.merge({id: id}, item);
         picItems.push(newItem);
         return newItem;
     },
