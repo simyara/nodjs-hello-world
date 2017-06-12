@@ -100,6 +100,6 @@ module.exports = {
     *deleteOne(id){
         picItems = picItems.filter((item) => item.id !== id);
         return id;
-        }
+    }
 };
 
