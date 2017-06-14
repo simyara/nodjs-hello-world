@@ -1,6 +1,6 @@
 "use strict";
 
-let pictureServer = require('../services/pictureServer');
+let pictureServer = require('../services/pictureService');
 let _ = require('lodash');
 let validator = require('../services/validator');
 
@@ -53,7 +53,7 @@ module.exports = {
 
 
 
-        let pictureData = yield pictureServer.findOne(this.params.id);
+        let pictureData = yield pictureServer.findOneAndUpdate(this.params.id, this.request.body);
 
         if (!pictureData) {
             this.status = 404;
@@ -65,8 +65,6 @@ module.exports = {
             };
             return;
         }
-
-        _.merge(pictureData, this.request.body);
 
         this.body = {
             status:'success',
@@ -124,7 +122,7 @@ module.exports = {
         yield next;
     },
     deleteOnePicture: function*() {
-        let pictureData = yield pictureServer.findOne(this.params.id);
+        let pictureData = yield pictureServer.deleteOne(this.params.id);
 
         if (!pictureData) {
             this.status = 404;
@@ -137,11 +135,9 @@ module.exports = {
             return;
         }
 
-        let deletedId = yield pictureServer.deleteOne(this.params.id);
-
         this.body = {
             status: 'success',
-            data: deletedId
+            data: pictureData
         };
     }
 };
