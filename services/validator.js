@@ -16,10 +16,14 @@ function validateObject(obj, schema) {
     let errorString = Object.keys(schema).map(function (key) {
 
         if (schema[key].required) {
-            if (obj[key] === 'undefined') {
+            if (obj[key] === undefined) {
                 errorMessage = key + ' value is required';
                 return errorMessage;
             }
+        }
+
+        if (obj[key] === undefined) {
+            return;
         }
 
         if ((typeof obj[key]) !== schema[key].type) {

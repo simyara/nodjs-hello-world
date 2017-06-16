@@ -1,59 +1,57 @@
 "use strict";
 
 let _ = require('lodash');
-let mongodb = require('./mongodbService');
+let co = require('co');
 
-const collName = 'pictures';
+let Picture = require('../Models/picture');
 
-function reduceElement(element, property){
-    if (element[property]){
-        delete element[property];
+function reduceElement(element, propertiesArray){
+    if (element) {
+        propertiesArray.forEach(function (property) {
+            if (element[property] !== undefined) {
+                delete element[property];
+            }
+        });
     }
     return element;
 }
 
-function reduceEachElement(array, property){
-    array.forEach((element) => reduceElement(element, property));
+function reduceEachElement(array, propertiesArray){
+    if (array.length>0) {
+        array.forEach((element) => reduceElement(element, propertiesArray));
+    }
     return array;
 }
 
 module.exports = {
     *getItemsList() {
-        let picList = yield mongodb.find(collName);
-        if (picList.length>0){
-            picList = reduceEachElement(picList, '_id');
-        }
-        return picList;
+            let picList = yield Picture.find().lean();
+            if (picList.length>0){
+                picList = reduceEachElement(picList, ['_id', '__v']);
+            }
+            return picList;
     },
     *findOne(id) {
         //return picItems.find((x) => x.id === id);
-        let picItem = yield mongodb.findOne(collName, {id: id});
-        if (picItem){
-            picItem = reduceElement(picItem, '_id');
-        }
+        let picItem = yield Picture.findOne({id: id}).lean();
+        picItem = reduceElement(picItem, ['_id', '__v']);
         return picItem;
     },
     *findOneAndUpdate(id, newData) {
         //return picItems.find((x) => x.id === id);
-        let picItem = (yield mongodb.findOneAndUpdate(collName, {id: id}, newData)).value;
-        if (picItem){
-            picItem = reduceElement(picItem, '_id');
-        }
+        let picItem = yield Picture.findOneAndUpdate({id: id}, { $set: newData}, {new: true}).lean();
+        picItem = reduceElement(picItem, ['_id', '__v']);
         return picItem;
     },
     *putOne(id, item) {
-        let newItem = _.merge({id: id}, item);
-        let picItem = (yield mongodb.insertOne(collName, newItem));
-        if (picItem){
-            newItem = reduceElement(newItem, '_id');
-        }
-        return newItem;
+        let newPicture = new Picture(_.merge({id: id}, item));
+        yield newPicture.save();
+        newPicture = reduceElement(newPicture.toObject(), ['_id', '__v']);
+        return newPicture;
     },
     *deleteOne(id){
-        let picItem = (yield mongodb.findOneAndDelete(collName, {id: id})).value;
-        if (picItem){
-            picItem = reduceElement(picItem, '_id');
-        }
+        let picItem = yield Picture.findOneAndRemove({id: id}).lean();
+        picItem = reduceElement(picItem, ['_id', '__v']);
         return picItem;
     }
 };

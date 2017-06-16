@@ -24,7 +24,7 @@ module.exports = {
             data: pictureData
         };
     },
-    updateOnePicture: function*(next) {
+    updateOnePicture: function*() {
 
         const schema = {
             name: {type: 'string'},
@@ -50,9 +50,6 @@ module.exports = {
                 return;
         }
 
-
-
-
         let pictureData = yield pictureServer.findOneAndUpdate(this.params.id, this.request.body);
 
         if (!pictureData) {
@@ -60,7 +57,7 @@ module.exports = {
             this.body = {
                 status: 'fail',
                 data: {
-                    error: 'Picture ot found'
+                    error: 'Picture not found'
                 }
             };
             return;
@@ -70,15 +67,14 @@ module.exports = {
             status:'success',
             data: pictureData
         };
-
-        yield next;
     },
-    addOnePicture: function*(next) {
+    addOnePicture: function*() {
 
         const schemaToPut = {
             name: {type: 'string', required: true},
             details: {
-                type :'object',
+                type : 'object',
+                required: true,
                 properties: {
                     url: {type: 'string', required: true},
                     description: {type: 'string', required: false}
@@ -118,8 +114,6 @@ module.exports = {
             status:'success',
             data: newPictureData
         };
-
-        yield next;
     },
     deleteOnePicture: function*() {
         let pictureData = yield pictureServer.deleteOne(this.params.id);
